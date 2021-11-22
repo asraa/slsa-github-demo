@@ -37,7 +37,8 @@ jobs:
       - name: Test get logs
         run: |
           # Get runs
-          curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json"   https://api.github.com/repos/asraa/slsa-github-demo/actions/runs
+          export ID=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/asraa/slsa-github-demo/actions/runs | jq '.workflow_runs[0].id')
+          curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/asraa/slsa-github-demo/actions/runs/$ID/jobs
       # TODO
   upload:
     name: upload
