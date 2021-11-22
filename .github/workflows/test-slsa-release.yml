@@ -32,6 +32,8 @@ jobs:
   provenance:
     name: provenance
     runs-on: ubuntu-latest
+    # Requires build to complete
+    needs: build
     steps:
       - uses: actions/checkout@v2.4.0
       - name: Test get logs
