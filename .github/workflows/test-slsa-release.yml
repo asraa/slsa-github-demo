@@ -18,11 +18,9 @@ name: Verify
 on: workflow_dispatch
 
 jobs:
-  verify-scorecard:
-    name: verify scorecard
-    runs-on: ubuntu-latest
-    steps:
-      # TODO
+  # verify-scorecard:
+  #   name: verify scorecard
+  #   runs-on: ubuntu-latest
   build:
     name: build
     runs-on: ubuntu-latest
@@ -38,6 +36,7 @@ jobs:
       - uses: actions/checkout@v2.4.0
       - name: Test get logs
         run: |
+          # Get runs
           curl -v -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }" -H "Accept: application/vnd.github.v3+json"   https://api.github.com/repos/ossf/scorecard/actions/runs
       # TODO
   upload:
