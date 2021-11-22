@@ -37,7 +37,7 @@ jobs:
       - name: Test get logs
         run: |
           # Get runs
-          curl -v -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }" -H "Accept: application/vnd.github.v3+json"   https://api.github.com/repos/ossf/scorecard/actions/runs
+          curl -v -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json"   https://api.github.com/repos/ossf/scorecard/actions/runs
       # TODO
   upload:
     name: upload
