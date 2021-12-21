@@ -41,7 +41,7 @@ jobs:
           repository: 'asraa/slsa-on-github'
       - uses: actions/setup-go@v2
       - name: build
-        run: go build -o main.go ./cmd/main.go
+        run: go build -o main ./cmd/main.go
       - name: Generate provenance
         run: ./main ${{ github.repository }}
       # TODO upload provenance
