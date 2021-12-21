@@ -43,7 +43,9 @@ jobs:
       - name: build
         run: go build -o main ./cmd/main.go
       - name: Generate provenance
-        run: ./main -repository ${{ github.repository }} > provenance.att
+        run: |
+          export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          ./main -repository ${{ github.repository }} > provenance.att
       - name: Upload provenance
         uses: 'actions/upload-artifact@v2'
         with:
