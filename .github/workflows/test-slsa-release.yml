@@ -50,6 +50,7 @@ jobs:
         uses: 'actions/upload-artifact@v2'
         with:
           name: provenance
+          path: provenance.att
       # TODO upload provenance
       # - uses: sigstore/cosign-installer@main
       # - name: Sign provenance
