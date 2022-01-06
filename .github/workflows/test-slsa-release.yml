@@ -62,8 +62,8 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # sign binary and provenance and upload to Container registry
-      - name: Upload binary as blob and sign with provenance
       - uses: sigstore/cosign-installer@main
+      - name: Upload binary as blob and sign with provenance
         run: |
           cosign upload blob -f main ghcr.io/asraa/slsa-github-demo
           cosign attach attestation --attestation att.provenance ghcr.io/asraa/slsa-github-demo
