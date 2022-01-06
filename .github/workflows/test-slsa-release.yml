@@ -77,8 +77,8 @@ jobs:
       - name: Upload binary as blob and sign with provenance
         run: |
           cosign upload blob -f main ghcr.io/asraa/slsa-github-demo
-          cosign attach attestation --attestation att.provenance ghcr.io/asraa/slsa-github-demo
           cosign sign ghcr.io/asraa/slsa-github-demo
+          cosign attest --predicate att.provenance ghcr.io/asraa/slsa-github-demo
 
   # upload:
   #  name: upload
