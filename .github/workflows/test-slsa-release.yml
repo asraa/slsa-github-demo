@@ -75,6 +75,8 @@ jobs:
       # sign binary and provenance and upload to Container registry
       - uses: sigstore/cosign-installer@main
       - name: Upload binary as blob and sign with provenance
+        env:
+          COSIGN_EXPERIMENTAL: "true"
         run: |
           cosign upload blob -f main ghcr.io/asraa/slsa-github-demo
           cosign sign ghcr.io/asraa/slsa-github-demo
