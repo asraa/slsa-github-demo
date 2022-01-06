@@ -44,6 +44,8 @@ jobs:
   provenance:
     permissions:
       id-token: write
+      packages: write
+      contents: read
 
     name: provenance
     runs-on: ubuntu-latest
