@@ -34,6 +34,12 @@ jobs:
       - uses: actions/setup-go@v2
       - name: build
         run: make -C $GITHUB_WORKSPACE all
+  # Upload it to use in the next step
+      - name: Upload build
+        uses: 'actions/upload-artifact@v2'
+        with:
+          name: main
+          path: main
   
   provenance:
     name: provenance
@@ -60,6 +66,11 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Download build from previous job
+      - uses: 'actions/download-artifact@v2'
+        with:
+          name: main
 
       # sign binary and provenance and upload to Container registry
       - uses: sigstore/cosign-installer@main
