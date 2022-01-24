@@ -21,10 +21,13 @@ import (
 	"context"
 	"crypto/x509"
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/google/go-containerregistry/pkg/name"
+	"github.com/google/go-github/v39/github"
 	"github.com/pkg/errors"
+	"github.com/sigstore/cosign/cmd/cosign/cli/fulcio"
 	"github.com/sigstore/cosign/cmd/cosign/cli/options"
 	"github.com/sigstore/cosign/cmd/cosign/cli/sign"
 	"github.com/sigstore/cosign/pkg/cosign"
@@ -44,6 +47,7 @@ func VerifyArtifact(img string) error {
 		// CertEmail:          c.CertEmail,
 		// Expect that the issuer is from GitHub
 		CertOidcIssuer: "https://token.actions.githubusercontent.com",
+		RootCerts:      fulcio.GetRoots(),
 	}
 	ref, err := name.ParseReference(img)
 	if err != nil {
@@ -71,22 +75,39 @@ func VerifyArtifact(img string) error {
 	jobWorkflowRef := sigs.CertSubject(signingCert)
 	trigger := getExtension(signingCert, "1.3.6.1.4.1.57264.1.2")
 	sha := getExtension(signingCert, "1.3.6.1.4.1.57264.1.3")
-	name := getExtension(signingCert, "1.3.6.1.4.1.57264.1.4")
-	repository := getExtension(signingCert, "1.3.6.1.4.1.57264.1.5")
-	workflowRef := getExtension(signingCert, "1.3.6.1.4.1.57264.1.6")
+
+	jobUri, err := url.Parse(jobWorkflowRef)
+	if err != nil {
+		return err
+	}
+	pathParts := strings.SplitN(jobUri.Path, "/", 4)
+	org := pathParts[1]
+	repo := pathParts[2]
+	filePath := strings.SplitN(pathParts[3], "@", 2)
+
+	// Are these needed?
+	// name := getExtension(signingCert, "1.3.6.1.4.1.57264.1.4")
+	// repository := getExtension(signingCert, "1.3.6.1.4.1.57264.1.5")
+	// workflowRef := getExtension(signingCert, "1.3.6.1.4.1.57264.1.6")
 
 	// Verify that the repo name, workflow path, and trigger name match.
 	fmt.Println(jobWorkflowRef)
 	fmt.Println(trigger)
 	fmt.Println(sha)
-	fmt.Println(name)
-	fmt.Println(repository)
-	fmt.Println(workflowRef)
 
 	// Checkout the workflow path at the commit hash from the cert.
+	client := github.NewClient(nil)
+	workflowContent, _, _, err := client.Repositories.GetContents(ctx, org, repo, filePath[0], &github.RepositoryContentGetOptions{})
+	if err != nil {
+		return err
+	}
+	content, err := workflowContent.GetContent()
+	if err != nil {
+		return err
+	}
 
 	// Verify the workflow content.
-	return nil
+	return verifyWorkflowContent(content)
 }
 
 func getExtension(cert *x509.Certificate, oid string) string {
@@ -96,4 +117,9 @@ func getExtension(cert *x509.Certificate, oid string) string {
 		}
 	}
 	return ""
+}
+
+func verifyWorkflowContent(content string) error {
+	// TODO: Implement workflow content verification.
+	return nil
 }
