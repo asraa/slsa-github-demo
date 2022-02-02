@@ -20,6 +20,7 @@ on: workflow_dispatch
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  DIGEST: NULL
 
 jobs:
   # verify-scorecard:
@@ -60,10 +61,17 @@ jobs:
       - uses: actions/setup-go@v2
       - name: build provenance generator
         run: go build -o prov ./cmd/main.go
+
+      # Download build from previous job
+      - uses: 'actions/download-artifact@v2'
+        with:
+          name: main
+
       - name: Generate provenance for build in previous job
         run: |
           export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          ./prov -repository ${{ github.repository }} > att.provenance
+          export DIGEST=$(sha256sum main | awk '{print $1}')
+          ./prov -repository ${{ github.repository }} -digest $DIGEST > att.provenance
           ls
       
       - name: Log in to the GitHub Container registry
@@ -72,11 +80,6 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      # Download build from previous job
-      - uses: 'actions/download-artifact@v2'
-        with:
-          name: main
 
       # sign binary and provenance and upload to Container registry
       - uses: sigstore/cosign-installer@main
