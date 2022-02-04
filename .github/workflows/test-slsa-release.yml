@@ -74,6 +74,7 @@ jobs:
           export DIGEST=$(sha256sum main | awk '{print $1}')
           ./prov -repository ${{ github.repository }} -digest $DIGEST > att.provenance
           ls
+          cat att.provenance
       
       - name: Log in to the GitHub Container registry
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
