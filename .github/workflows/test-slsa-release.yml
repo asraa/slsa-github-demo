@@ -21,27 +21,19 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   DIGEST: NULL
+  BUILDER_GO_VERSION: 1.17
 
 jobs:
   # verify-scorecard:
   #   name: verify scorecard
   #   runs-on: ubuntu-latest
   build:
-    name: build
+    name: SLSA Golang builder
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.4.0
-      # TODO: Hermeticize?
-      - uses: actions/setup-go@v2
-      # Use goreleaser
-      - name: build
-        run: make -C $GITHUB_WORKSPACE all
-      # Upload it to use in the next step
-      - name: Upload build
-        uses: 'actions/upload-artifact@v2'
+      - uses: laurentsimon/slsa-on-github/builder-golang@feat/actionfetch
         with:
-          name: main
-          path: main
+          go-version: ${{ env.BUILDER_GO_VERSION }}
   
   provenance:
     permissions:
@@ -65,12 +57,12 @@ jobs:
       # Download build from previous job
       - uses: 'actions/download-artifact@v2'
         with:
-          name: main
+          name: SLSA_BINARY
 
       - name: Generate provenance for build in previous job
         run: |
           export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          export DIGEST=$(sha256sum main | awk '{print $1}')
+          export DIGEST=$(sha256sum SLSA_BINARY | awk '{print $1}')
           ./prov -repository ${{ github.repository }} -digest $DIGEST > att.provenance
           ls
       
@@ -87,6 +79,6 @@ jobs:
         env:
           COSIGN_EXPERIMENTAL: "true"
         run: |
-          cosign upload blob -f main ghcr.io/asraa/slsa-github-demo
+          cosign upload blob -f SLSA_BINARY ghcr.io/asraa/slsa-github-demo
           cosign sign ghcr.io/asraa/slsa-github-demo
           cosign attest --predicate att.provenance ghcr.io/asraa/slsa-github-demo
